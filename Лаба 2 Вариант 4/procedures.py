@@ -109,3 +109,39 @@ def geffe_for_file(filename,register_0,register_1,register_2):
     f.close()
     
     return ciphertext
+
+def generate_rc4_s_block(key):
+    '''Принимает строку - ключ, создает s-блок по ключу (список)'''
+    S = []
+    for i in range(256):
+        S.append(i)
+    j = 0
+    for i in range(256):
+        j = (j + S[i] + ord(key[i % len(key)])) % 256
+        S[i],S[j] = S[j],S[i] 
+        
+    return S
+
+def generate_rc4_k(S,length):
+    '''Принимает список (S-блок). Генерирует по нему псевдослучайный список K длины length'''
+    
+    i,j = 0,0
+    K = []
+    for r in range(length):
+        i = (i + 1) % 256
+        j = (j + S[i]) % 256
+        S[i],S[j] = S[j],S[i] 
+        K.append(S[ (S[i] + S[j]) % 256 ])
+
+    return K
+
+def rc4(plaintext,key):
+    '''принимает текст и ключ и шифрует RC4'''
+    S = generate_rc4_s_block(key) 
+    K = generate_rc4_k(S,len(plaintext))
+    
+    ciphertext = ''
+    for i in range(len(K)):
+        ciphertext += chr(ord(plaintext[i]) ^ K[i])
+        
+    return ciphertext
